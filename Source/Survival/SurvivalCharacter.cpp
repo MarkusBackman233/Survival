@@ -401,7 +401,7 @@ void ASurvivalCharacter::Tick(float DeltaTime)
 	auto BloodWidget2 = PlayerHealthWidget->GetWidgetFromName("Blood2");
 
 	float NormalizedHealthInv = (std::max(1.0f - (fHealth / fMaxHealth), 0.0f) - 0.5f) * 2.0f;
-	float Opacity = std::clamp(pow(NormalizedHealthInv, 3.0f), 0.0f, 1.0f) * 0.8f;
+	float Opacity = FMath::Clamp(FMath::Pow(NormalizedHealthInv, 3.0f), 0.0f, 1.0f) * 0.8f;
 
 	if (BloodWidget1)
 	{

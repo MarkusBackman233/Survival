@@ -542,7 +542,7 @@ void AHumanAi::Tick(float DeltaTime)
 
 
     float MovementDot = GetVelocity().GetSafeNormal().Dot(GetActorForwardVector()) * 0.5f + 0.5f;
-    GetCharacterMovement()->MaxWalkSpeed = std::lerp(200.0f, 400.0f, MovementDot);
+    GetCharacterMovement()->MaxWalkSpeed = FMath::Lerp(200.0f, 400.0f, MovementDot);
 
 
     if (SeenTarget || bHasRecentlySeenPlayer)
