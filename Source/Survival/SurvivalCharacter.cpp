@@ -25,7 +25,7 @@
 #include <Components/Button.h>
 #include <Components/VerticalBox.h>
 #include <Components/VerticalBoxSlot.h>
-
+#include "PickupBase.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -219,24 +219,21 @@ void ASurvivalCharacter::Tick(float DeltaTime)
 		ECC_Visibility,
 		Params
 	);
+
 	if (bHit && HitResult.GetActor())
 	{
-		if (auto Weapon = Cast<ASurvivalWeaponActor>(HitResult.GetActor()))
+		if (auto Pickup = Cast<APickupBase>(HitResult.GetActor()))
 		{
-			FocusedWeapon = Weapon;
 			if (InteractionText)
 			{
-				InteractionText->SetText(FText::FromString("Press F to pick up weapon"));
+				InteractionText->SetText(FText::FromString(Pickup->GetPickupInteractionPrompt()));
 			}
-		}
-		else
-		{
-			FocusedWeapon = nullptr;
+			FocusedItem = Pickup;
 		}
 	}
 	else
 	{
-		FocusedWeapon = nullptr;
+		FocusedItem = nullptr;
 	}
 
 	if (!GetCharacterMovement()->IsFalling())
@@ -749,6 +746,16 @@ void ASurvivalCharacter::OnUnequipAnimationEnded(UAnimMontage* Montage, bool bIn
 	QueuedEquip = nullptr;
 }
 
+void ASurvivalCharacter::ThrowCurrentHeldWeapon()
+{
+	CurrentHeldWeapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
+	CurrentHeldWeapon->EnableSimulation();
+	FVector ThrowDirection = FirstPersonCameraComponent->GetForwardVector();
+	CurrentHeldWeapon->Mesh->AddImpulse(ThrowDirection * 300.f, NAME_None, true);
+	CurrentHeldWeapon = nullptr;
+	CurrentItems[HeldItemIndex] = nullptr;
+}
+
 void ASurvivalCharacter::SetCurrentHeldWeapon(ASurvivalWeaponActor* weapon)
 {
 
@@ -957,67 +964,9 @@ void ASurvivalCharacter::ThrowGrenade(const FInputActionValue& Instance)
 
 void ASurvivalCharacter::Interaction(const FInputActionValue& Instance)
 {
-	if (FocusedWeapon && !IsEquiping())
+	if (FocusedItem)
 	{
-		for (int i = 0; i < MaxItems; i++)
-		{
-			if (CurrentItems[i] != nullptr && FocusedWeapon->WeaponType == CurrentItems[i]->WeaponType)
-			{
-				auto& ammo = AmmoByWeaponType.Find(FocusedWeapon->WeaponType)->CurrentAmmo;
-				ammo += FocusedWeapon->ExtraAmmo;
-				FocusedWeapon->ExtraAmmo = 0;
-				ammo = std::min(ammo, AmmoByWeaponType.Find(FocusedWeapon->WeaponType)->MaxAmmo);
-				FocusedWeapon->Destroy();
-				UpdateUI();
-				return;
-			}
-		}
-
-
-		int freeSlot = -1;
-		if (CurrentHeldWeapon == nullptr)
-		{
-			freeSlot = HeldItemIndex;
-		}
-		else
-		{
-			for (int i = 0; i < MaxItems; i++)
-			{
-				if (CurrentItems[i] == nullptr)
-				{
-					freeSlot = i;
-				}
-			}
-		}
-		if (freeSlot == -1)
-		{
-			if (CurrentHeldWeapon)
-			{
-				CurrentHeldWeapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
-				CurrentHeldWeapon->EnableSimulation();
-				FVector ThrowDirection = FirstPersonCameraComponent->GetForwardVector();
-				CurrentHeldWeapon->Mesh->AddImpulse(ThrowDirection * 300.f, NAME_None, true);
-				CurrentHeldWeapon = nullptr;
-				CurrentItems[HeldItemIndex] = nullptr;
-				freeSlot = HeldItemIndex;
-			}
-		}
-		else if (HeldItemIndex != freeSlot)
-		{
-			HeldItemIndex = freeSlot;
-		}
-
-		FocusedWeapon->AttachWeapon(this);
-		FocusedWeapon->Mesh->SetVisibility(false);
-		QueueEquip(FocusedWeapon);
-
-		auto& ammo = AmmoByWeaponType.Find(FocusedWeapon->WeaponType)->CurrentAmmo;
-		ammo += FocusedWeapon->ExtraAmmo;
-		FocusedWeapon->ExtraAmmo = 0;
-		ammo = std::min(ammo, AmmoByWeaponType.Find(FocusedWeapon->WeaponType)->MaxAmmo);
-
-
-		CurrentItems[freeSlot] = FocusedWeapon;
+		FocusedItem->OnPlayerInteract(this);
 	}
 }
 
@@ -1047,6 +996,8 @@ void ASurvivalCharacter::SwitchToSecondaryWeapon(const FInputActionValue& Instan
 
 void ASurvivalCharacter::QueueEquip(ASurvivalWeaponActor* Weapon)
 {
+	Weapon->Mesh->SetVisibility(false);
+
 	UAnimInstance* AnimInstance = GetMesh1P()->GetAnimInstance();
 	if (AnimInstance != nullptr && Weapon)
 	{
@@ -1072,6 +1023,32 @@ void ASurvivalCharacter::QueueEquip(ASurvivalWeaponActor* Weapon)
 			return;
 		}
 	}
+}
+
+void ASurvivalCharacter::EquipOrReplaceWeapon(ASurvivalWeaponActor* Weapon)
+{
+	constexpr int WeaponSlotInvalid = -1;
+
+	int FreeSlot = WeaponSlotInvalid;
+
+	for (int i = 0; i < MaxItems; i++)
+	{
+		if (CurrentItems[i] == nullptr)
+		{
+			FreeSlot = i;
+			break;
+		}
+	}
+
+	if (FreeSlot == WeaponSlotInvalid)
+	{
+		ThrowCurrentHeldWeapon();
+		FreeSlot = HeldItemIndex;
+	}
+
+	CurrentItems[FreeSlot] = Weapon;
+	HeldItemIndex = FreeSlot;
+	QueueEquip(Weapon);
 }
 
 void ASurvivalCharacter::ResetGrenadeCooldown()

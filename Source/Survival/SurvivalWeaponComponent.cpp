@@ -13,8 +13,9 @@
 #include "Engine/World.h"
 #include "Components/SphereComponent.h"
 // Sets default values for this component's properties
-ASurvivalWeaponActor::ASurvivalWeaponActor()
-	: LastFireTime(0.0f)
+ASurvivalWeaponActor::ASurvivalWeaponActor() 
+	: APickupBase()
+	, LastFireTime(0.0f)
 {
 	bIsReloading = false;
 	Mesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("CharacterMesh1P"));
@@ -27,6 +28,8 @@ ASurvivalWeaponActor::ASurvivalWeaponActor()
 	PickupSphere->SetCollisionResponseToAllChannels(ECR_Ignore);
 	PickupSphere->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
 	PickupSphere->SetupAttachment(Mesh);
+
+
 }
 
 
@@ -156,6 +159,16 @@ void ASurvivalWeaponActor::EnableSimulation()
 int ASurvivalWeaponActor::GetModifiedMagazineSize()
 {
 	return Character->PowerUpCounter[static_cast<int>(EPowerUp::AmmoCapacity)] + MagazineSize;
+}
+
+void ASurvivalWeaponActor::OnPlayerInteract(ASurvivalCharacter* Interactor)
+{
+	if (Interactor->IsEquiping())
+	{
+		return;
+	}
+	AttachWeapon(Interactor);
+	Interactor->EquipOrReplaceWeapon(this);
 }
 
 void ASurvivalWeaponActor::DisableSimulation()
@@ -336,7 +349,8 @@ void ASurvivalWeaponActor::EndPlay(const EEndPlayReason::Type EndPlayReason)
 void ASurvivalWeaponActor::BeginPlay()
 {
 	Super::BeginPlay();
+	SetPickupItemName(WeaponName);
+
 	BulletsLeftInMagazine = MagazineSize;
-	ExtraAmmo = FMath::RandRange(2, MagazineSize * 2);
 }
 

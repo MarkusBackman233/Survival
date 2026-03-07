@@ -6,12 +6,15 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/Actor.h"
 #include "MyWeaponType.h"
+#include "PickupBase.h"
+
 #include "SurvivalWeaponComponent.generated.h"
 class ASurvivalCharacter;
 class USphereComponent;
+class AAmmoPickup;
 
 UCLASS(Blueprintable, BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class SURVIVAL_API ASurvivalWeaponActor : public AActor
+class SURVIVAL_API ASurvivalWeaponActor : public APickupBase
 {
 	GENERATED_BODY()
 
@@ -71,7 +74,11 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
 	EMyWeaponType WeaponType;
-
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
+	FString WeaponName;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "State")
+	TSubclassOf<class AAmmoPickup> AmmoBox;
+	
 
 	UPROPERTY(EditDefaultsOnly, Category = "FX")
 	UParticleSystem* MuzzleParticle;
@@ -104,12 +111,12 @@ public:
 	void PlayFireAudio();
 	int BulletsLeftInMagazine;
 
-	int ExtraAmmo = 0;
-
 	void DisableSimulation();
 	void EnableSimulation();
 
 	int GetModifiedMagazineSize();
+
+	virtual void OnPlayerInteract(ASurvivalCharacter* Interactor) override;
 
 protected:
 	UFUNCTION()

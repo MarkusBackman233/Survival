@@ -21,6 +21,7 @@
 #include "EnvironmentQuery/EnvQueryManager.h"
 #include "EnvironmentQuery/EnvQuery.h"
 #include "EnemySpawnerSystem.h"
+#include "AmmoPickup.h"
 APawn* AHumanAi::GetSeenTarget() const
 {
     return SeenTarget;
@@ -229,6 +230,17 @@ float AHumanAi::TakeDamage(
         {
             HeldWeapon->DetachFromActor(FDetachmentTransformRules::KeepWorldTransform);
             HeldWeapon->EnableSimulation();
+
+            
+            AAmmoPickup* SpawnedAmmoBox = GetWorld()->SpawnActor<AAmmoPickup>(
+                HeldWeapon->AmmoBox,
+                GetActorTransform()
+            );
+            //if (SpawnedAmmoBox)
+            //{
+            //    SpawnedAmmoBox->AddImpulse(ThrowDirection * 300.f, NAME_None, true);
+            //}
+
         }
 
         SetLifeSpan(40.0f);

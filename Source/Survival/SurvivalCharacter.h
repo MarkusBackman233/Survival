@@ -50,6 +50,7 @@ class UInputMappingContext;
 class ASurvivalWeaponActor;
 class UCurveVector;
 class AGrenade;
+class APickupBase;
 struct FInputActionValue;
 
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
@@ -287,7 +288,7 @@ protected:
 	void PlayRandomFootstepSound();
 
 	UPROPERTY()
-	ASurvivalWeaponActor* FocusedWeapon = nullptr;
+	APickupBase* FocusedItem = nullptr;
 
 	static constexpr int MaxItems = 2;
 
@@ -313,7 +314,6 @@ protected:
 	void OnEquipAnimationEnded(UAnimMontage* Montage, bool bInterrupted);
 
 
-	void QueueEquip(ASurvivalWeaponActor* Weapon);
 
 	FTransform CameraHeadbobOffset;
 	FTransform WeaponRecoilOffset;
@@ -370,15 +370,21 @@ public:
 	/** Returns FirstPersonCameraComponent subobject **/
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
 
-	bool IsDead() { return fHealth <= 0.0f; }
+	bool IsDead() const { return fHealth <= 0.0f; }
 
 
-	void SetCurrentHeldWeapon(ASurvivalWeaponActor* weapon);
 	void ApplyRecoilKick(float Amount);
 	void SetHoldingMagazine(bool State);
 
 	void UpdateUI();
 
 	bool IsEquiping();
+	void QueueEquip(ASurvivalWeaponActor* Weapon);
 
+	// if player already has two weapons, replace the one in the hands
+	void EquipOrReplaceWeapon(ASurvivalWeaponActor* Weapon);
+
+	private:
+	void ThrowCurrentHeldWeapon();
+	void SetCurrentHeldWeapon(ASurvivalWeaponActor* weapon);
 };
