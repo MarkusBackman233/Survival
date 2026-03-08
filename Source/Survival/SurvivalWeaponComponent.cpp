@@ -100,7 +100,7 @@ void ASurvivalWeaponActor::PlayFireAudio()
 			this,
 			FireSoundsNear[FMath::RandHelper(FireSoundsNear.Num())],
 			GetActorLocation(),
-			CloseVolume,
+			CloseVolume*1.2f,
 			FMath::FRandRange(1.0f, 1.0f),
 			0.0f,
 			FireSoundAttenuation
@@ -113,7 +113,7 @@ void ASurvivalWeaponActor::PlayFireAudio()
 			this,
 			FireSoundsFar[FMath::RandHelper(FireSoundsFar.Num())],
 			GetActorLocation(),
-			FarVolume,
+			FarVolume * 1.2f,
 			FMath::FRandRange(1.0f, 1.0f),
 			0.0f,
 			FireSoundAttenuation

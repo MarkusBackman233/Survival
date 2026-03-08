@@ -30,6 +30,10 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ammo")
 	FString BulletName = TEXT("Null");
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Sound")
+	USoundBase* InteractionSound;
+
+
 	virtual void OnPlayerInteract(class ASurvivalCharacter* Interactor) override;
 
 protected:

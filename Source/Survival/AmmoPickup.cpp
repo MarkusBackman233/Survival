@@ -3,6 +3,7 @@
 
 #include "Survival/AmmoPickup.h"
 #include "Survival/SurvivalCharacter.h"
+#include <Kismet/GameplayStatics.h>
 void AAmmoPickup::OnPlayerInteract(ASurvivalCharacter* Interactor)
 {
     if (!Interactor) 
@@ -12,7 +13,14 @@ void AAmmoPickup::OnPlayerInteract(ASurvivalCharacter* Interactor)
 
     if (!PlayerAmmo) 
         return;
-
+    if (InteractionSound)
+    {
+        UGameplayStatics::PlaySoundAtLocation(
+            this,
+            InteractionSound,
+            GetActorLocation()
+        );
+    }
     int32 AmmoToGive = FMath::Min(Bullets, PlayerAmmo->MaxAmmo - PlayerAmmo->CurrentAmmo);
 
     PlayerAmmo->CurrentAmmo += AmmoToGive;
@@ -21,6 +29,7 @@ void AAmmoPickup::OnPlayerInteract(ASurvivalCharacter* Interactor)
 
     if (Bullets <= 0)
     {
+        SetActorEnableCollision(false);
         Destroy();
     }
     Interactor->UpdateUI();

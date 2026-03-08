@@ -15,6 +15,7 @@ public:
 	APickupBase();
 	FString GetPickupInteractionPrompt() const;
 
+
 	virtual void OnPlayerInteract(ASurvivalCharacter* Interactor) {};
 protected:
 	void SetPickupOnOverlap(bool Enable);
@@ -22,6 +23,8 @@ protected:
 
 
 private:
+
+
 
 	// Set this if the user does not have to press "E" on the object to pick it up
 	// Walking over it picks it up instead

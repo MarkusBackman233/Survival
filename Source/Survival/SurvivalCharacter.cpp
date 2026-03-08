@@ -220,7 +220,7 @@ void ASurvivalCharacter::Tick(float DeltaTime)
 		Params
 	);
 
-	if (bHit && HitResult.GetActor())
+	if (bHit && IsValid(HitResult.GetActor()))
 	{
 		if (auto Pickup = Cast<APickupBase>(HitResult.GetActor()))
 		{
@@ -240,8 +240,18 @@ void ASurvivalCharacter::Tick(float DeltaTime)
 	{
 		if (HeadbobbingEnabled)
 		{
+
+			float HeadbobSpeed = FMath::GetMappedRangeValueClamped(
+				FVector2D(WalkingMovementSpeed, SprintingMovementSpeed),
+				FVector2D(HeadbobSpeedWalking, HeadbobSpeedRunning),
+				FSmoothedVelocityLength
+			);
+
+
+			HeadbobSpeed *= FMath::Clamp(FSmoothedVelocityLength, 0.0f, 400.0f) / 400.0f;
+
 			HeadbobTimeline.TickTimeline(DeltaTime);
-			HeadbobTimeline.SetPlayRate(FSmoothedVelocityLength / 400.0f);
+			HeadbobTimeline.SetPlayRate(HeadbobSpeed);
 		}
 	}
 
@@ -379,16 +389,19 @@ void ASurvivalCharacter::Tick(float DeltaTime)
 		Rotator.Pitch += CameraRecoilSpring.Value.Pitch;
 		Rotator.Roll += CameraRecoilSpring.Value.Roll;
 		Rotator.Yaw += CameraRecoilSpring.Value.Yaw;
-		auto HeadbobRotator = CameraHeadbobOffset.GetRotation().Rotator();
-		HeadbobRotator.Pitch *= FSmoothedVelocityLength / 100.0f;
-		HeadbobRotator.Roll *= FSmoothedVelocityLength / 100.0f;
-		HeadbobRotator.Yaw *= FSmoothedVelocityLength / 10.0f;
-		Rotator += HeadbobRotator;
+
+
+		float HeadbobMultiplier = FMath::GetMappedRangeValueClamped(
+			FVector2D(WalkingMovementSpeed, SprintingMovementSpeed),
+			FVector2D(HeadbobMultiplierWalking, HeadbobMultiplierRunning),
+			FSmoothedVelocityLength
+		);
+		Rotator += CameraHeadbobOffset.GetRotation().Rotator() * HeadbobMultiplier;
 
 		//float CameraRoll = FMath::FInterpTo(fCameraRollError, GetVelocity().GetSafeNormal().Dot(GetActorRightVector()), DeltaTime, 5.0f);
 		if (HeadbobbingEnabled)
 		{
-			Rotator.Roll += std::clamp(static_cast<float>(InputVelocity.X) * FSmoothedVelocityLength / 600.0f,0.0f,1.0f)*3.0f;
+			Rotator.Roll += std::clamp(static_cast<float>(InputVelocity.X) * FSmoothedVelocityLength / 600.0f,0.0f,1.0f)*6.0f;
 		}
 
 		FirstPersonCameraComponent->SetRelativeRotation(Rotator);
@@ -964,7 +977,7 @@ void ASurvivalCharacter::ThrowGrenade(const FInputActionValue& Instance)
 
 void ASurvivalCharacter::Interaction(const FInputActionValue& Instance)
 {
-	if (FocusedItem)
+	if (IsValid(FocusedItem) && !FocusedItem->IsActorBeingDestroyed())
 	{
 		FocusedItem->OnPlayerInteract(this);
 	}
@@ -1080,7 +1093,7 @@ void ASurvivalCharacter::PlayRandomFootstepSound()
 	UAISense_Hearing::ReportNoiseEvent(
 		GetWorld(),
 		GetActorLocation(),
-		1.0f,              // Loudness
+		0.7f,              // Loudness
 		this,              // Instigator
 		GetVelocity().Length() / 400.0f * 1500.f,
 		TEXT("Footstep")

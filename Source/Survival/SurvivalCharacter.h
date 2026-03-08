@@ -111,8 +111,18 @@ class ASurvivalCharacter : public ACharacter
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* SwitchToSecondaryWeaponAction;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Headbob", meta = (AllowPrivateAccess = "true"))
 	class UCurveVector* HeadbobCurve;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Headbob", meta = (AllowPrivateAccess = "true"))
+	float HeadbobSpeedWalking = 350.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Headbob", meta = (AllowPrivateAccess = "true"))
+	float HeadbobMultiplierWalking = 5.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Headbob", meta = (AllowPrivateAccess = "true"))
+	float HeadbobSpeedRunning = 400.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Headbob", meta = (AllowPrivateAccess = "true"))
+	float HeadbobMultiplierRunning = 10.0f;
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<AGrenade> Grenade;
