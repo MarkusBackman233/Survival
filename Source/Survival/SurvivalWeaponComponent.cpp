@@ -11,7 +11,8 @@
 #include "Animation/AnimInstance.h"
 #include "Engine/LocalPlayer.h"
 #include "Engine/World.h"
-#include "Components/SphereComponent.h"
+#include "SurvivalPickUpComponent.h"
+
 // Sets default values for this component's properties
 ASurvivalWeaponActor::ASurvivalWeaponActor() 
 	: APickupBase()
@@ -21,13 +22,15 @@ ASurvivalWeaponActor::ASurvivalWeaponActor()
 	Mesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("CharacterMesh1P"));
 	SetRootComponent(Mesh);
 
-	PickupSphere = CreateDefaultSubobject<USphereComponent>(TEXT("PickupSphere"));
-	PickupSphere->InitSphereRadius(50.f);
-	PickupSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	PickupSphere->SetCollisionObjectType(ECC_WorldDynamic);
-	PickupSphere->SetCollisionResponseToAllChannels(ECR_Ignore);
-	PickupSphere->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
-	PickupSphere->SetupAttachment(Mesh);
+
+	// PickupSphere became PickupComponent so that pickup overlap is handled by SurvivalPickUpComponent
+	PickupComponent = CreateDefaultSubobject<USurvivalPickUpComponent>(TEXT("PickupComponent"));
+	PickupComponent->InitSphereRadius(50.f);
+	PickupComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	PickupComponent->SetCollisionObjectType(ECC_WorldDynamic);
+	PickupComponent->SetCollisionResponseToAllChannels(ECR_Ignore);
+	PickupComponent->SetCollisionResponseToChannel(ECC_Pawn, ECR_Overlap);
+	PickupComponent->SetupAttachment(Mesh);
 
 
 }
@@ -152,7 +155,7 @@ void ASurvivalWeaponActor::EnableSimulation()
 	Mesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	Mesh->SetSimulatePhysics(true);
 
-	PickupSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	PickupComponent->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
 
 }
 
@@ -175,7 +178,7 @@ void ASurvivalWeaponActor::DisableSimulation()
 {
 	Mesh->SetSimulatePhysics(false);
 	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	PickupSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	PickupComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 }
 
@@ -352,5 +355,19 @@ void ASurvivalWeaponActor::BeginPlay()
 	SetPickupItemName(WeaponName);
 
 	BulletsLeftInMagazine = MagazineSize;
+
+	if (PickupComponent) {
+		PickupComponent->OnPickUp.AddDynamic(this, &ASurvivalWeaponActor::OnPickupOverlap);
+	}
 }
+
+void ASurvivalWeaponActor::OnPickupOverlap(ASurvivalCharacter* PickupCharacter) {
+
+	if (PickupCharacter) {
+		OnPlayerInteract(PickupCharacter);
+	}
+
+}
+
+
 

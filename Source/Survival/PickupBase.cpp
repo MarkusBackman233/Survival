@@ -9,7 +9,9 @@ APickupBase::APickupBase()
 
 }
 
-
+bool APickupBase::ShouldPickupOnOverlap() const {
+	return PickupOnOverlap;
+}
 
 void APickupBase::SetPickupOnOverlap(bool Enable)
 {

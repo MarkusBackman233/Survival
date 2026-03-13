@@ -10,7 +10,7 @@
 
 #include "SurvivalWeaponComponent.generated.h"
 class ASurvivalCharacter;
-class USphereComponent;
+class USurvivalPickUpComponent;
 class AAmmoPickup;
 
 UCLASS(Blueprintable, BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -21,7 +21,7 @@ class SURVIVAL_API ASurvivalWeaponActor : public APickupBase
 public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Collision")
-	USphereComponent* PickupSphere;
+	USurvivalPickUpComponent* PickupComponent;
 
 	/** Projectile class to spawn */
 	UPROPERTY(EditDefaultsOnly, Category=Projectile)
@@ -119,6 +119,9 @@ public:
 	virtual void OnPlayerInteract(ASurvivalCharacter* Interactor) override;
 
 protected:
+
+	UFUNCTION()
+	void OnPickupOverlap(ASurvivalCharacter* PickupCharacter);
 	UFUNCTION()
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
