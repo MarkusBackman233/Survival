@@ -39,4 +39,5 @@ void AAmmoPickup::BeginPlay()
 {
 	Super::BeginPlay();
 	SetPickupItemName(BulletName);
+    SetPickupOnOverlap(true);
 }

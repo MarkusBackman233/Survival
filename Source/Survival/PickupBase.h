@@ -15,6 +15,9 @@ public:
 	APickupBase();
 	FString GetPickupInteractionPrompt() const;
 
+	// A getter so that other classes can check if a pickup should activate on overlap
+	bool ShouldPickupOnOverlap() const;
+
 
 	virtual void OnPlayerInteract(ASurvivalCharacter* Interactor) {};
 protected:
