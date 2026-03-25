@@ -5,6 +5,9 @@
 #include "PickupBase.generated.h"
 
 class ASurvivalCharacter;
+class USphereComponent;
+class UPrimitiveComponent;
+struct FHitResult;
 
 UCLASS()
 class SURVIVAL_API APickupBase : public AActor
@@ -15,15 +18,30 @@ public:
 	APickupBase();
 	FString GetPickupInteractionPrompt() const;
 
+	// A getter so that other classes can check if a pickup should activate on overlap
+	bool ShouldPickupOnOverlap() const;
+
 
 	virtual void OnPlayerInteract(ASurvivalCharacter* Interactor) {};
 protected:
 	void SetPickupOnOverlap(bool Enable);
 	void SetPickupItemName(const FString& Name);
 
+	UFUNCTION()
+	void OnPickupSphereOverlap(
+		UPrimitiveComponent* OverlappedComponent,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex,
+		bool bFromSweep,
+		const FHitResult& SweepResult
+	);
+
 
 private:
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Collision", meta = (AllowPrivateAccess = "true"))
+	USphereComponent* PickupSphere;
 
 
 	// Set this if the user does not have to press "E" on the object to pick it up

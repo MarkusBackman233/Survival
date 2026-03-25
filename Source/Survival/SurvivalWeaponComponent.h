@@ -10,7 +10,7 @@
 
 #include "SurvivalWeaponComponent.generated.h"
 class ASurvivalCharacter;
-class USphereComponent;
+
 class AAmmoPickup;
 
 UCLASS(Blueprintable, BlueprintType, ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -19,9 +19,6 @@ class SURVIVAL_API ASurvivalWeaponActor : public APickupBase
 	GENERATED_BODY()
 
 public:
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Collision")
-	USphereComponent* PickupSphere;
 
 	/** Projectile class to spawn */
 	UPROPERTY(EditDefaultsOnly, Category=Projectile)

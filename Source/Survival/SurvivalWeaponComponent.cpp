@@ -20,16 +20,6 @@ ASurvivalWeaponActor::ASurvivalWeaponActor()
 	bIsReloading = false;
 	Mesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("CharacterMesh1P"));
 	SetRootComponent(Mesh);
-
-	PickupSphere = CreateDefaultSubobject<USphereComponent>(TEXT("PickupSphere"));
-	PickupSphere->InitSphereRadius(50.f);
-	PickupSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	PickupSphere->SetCollisionObjectType(ECC_WorldDynamic);
-	PickupSphere->SetCollisionResponseToAllChannels(ECR_Ignore);
-	PickupSphere->SetCollisionResponseToChannel(ECC_Visibility, ECR_Block);
-	PickupSphere->SetupAttachment(Mesh);
-
-
 }
 
 
@@ -152,7 +142,7 @@ void ASurvivalWeaponActor::EnableSimulation()
 	Mesh->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	Mesh->SetSimulatePhysics(true);
 
-	PickupSphere->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	
 
 }
 
@@ -175,7 +165,6 @@ void ASurvivalWeaponActor::DisableSimulation()
 {
 	Mesh->SetSimulatePhysics(false);
 	Mesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	PickupSphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 }
 
