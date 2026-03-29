@@ -1,5 +1,5 @@
 # Survival
-Difficuly increases every round.
+Difficulty increases every round.
 Some rounds the enemies gets access new equipment or weapons. 
 
 https://github.com/user-attachments/assets/27e3d7a5-f079-4e0b-a704-6a8d8a239d6b
